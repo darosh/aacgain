@@ -1,6 +1,8 @@
 [submodule "3rdparty/faad2"]
 	path = 3rdparty/faad2
 	url = https://github.com/dgilman/faad2.git
+	ignore = dirty
 [submodule "3rdparty/mp4v2"]
 	path = 3rdparty/mp4v2
 	url = https://github.com/dgilman/mp4v2.git
+	ignore = dirty

@@ -14,6 +14,7 @@ target_include_directories(aacgain PRIVATE
                            "${PROJECT_SOURCE_DIR}/3rdparty/mp4v2/src"
                            "${PROJECT_SOURCE_DIR}/3rdparty/mp4v2/include"
                            "${PROJECT_SOURCE_DIR}/3rdparty/faad2/include"
+                           "${PROJECT_BINARY_DIR}/3rdparty/mp4v2_proj-prefix/src/mp4v2_proj-build"
 			   "${PROJECT_BINARY_DIR}/aacgain"
                           )
 target_link_libraries(aacgain PRIVATE

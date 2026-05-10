@@ -4,20 +4,32 @@ IF(UNIX)
 include(ProcessorCount)
 ProcessorCount(N)
 
+if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+    set(AUTOTOOLS_HOST "--host=x86_64-apple-darwin")
+    set(AUTOTOOLS_CFLAGS "CFLAGS=\"-arch x86_64 -std=gnu99\"")
+    set(AUTOTOOLS_CXXFLAGS "CXXFLAGS=\"-arch x86_64\"")
+elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+    set(AUTOTOOLS_HOST "--host=arm-apple-darwin")
+    set(AUTOTOOLS_CFLAGS "CFLAGS=\"-arch arm64 -std=gnu99\"")
+    set(AUTOTOOLS_CXXFLAGS "CXXFLAGS=\"-arch arm64\"")
+else()
+    set(AUTOTOOLS_HOST "")
+    set(AUTOTOOLS_CFLAGS "CFLAGS=\"-std=gnu99\"")
+    set(AUTOTOOLS_CXXFLAGS "")
+endif()
+
 ExternalProject_Add(faad2_proj
                     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/faad2"
-                    CONFIGURE_COMMAND autoreconf -i && ./configure --prefix=${CMAKE_CURRENT_BINARY_DIR} --disable-shared --enable-static
+                    CONFIGURE_COMMAND sh -c "cd <SOURCE_DIR> && rm -f config.status && autoreconf -i && cd <BINARY_DIR> && <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --disable-shared --enable-static ${AUTOTOOLS_HOST} ${AUTOTOOLS_CFLAGS}"
                     BUILD_COMMAND make -j ${N}
                     INSTALL_COMMAND make -j ${N} install
-                    BUILD_IN_SOURCE 1
                    )
 
 ExternalProject_Add(mp4v2_proj
                     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mp4v2"
-                    CONFIGURE_COMMAND autoreconf -i && ./configure --prefix=${CMAKE_CURRENT_BINARY_DIR} --disable-shared --enable-static
+                    CONFIGURE_COMMAND sh -c "cd <SOURCE_DIR> && rm -f config.status && autoreconf -i && cd <BINARY_DIR> && <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --disable-shared --enable-static ${AUTOTOOLS_HOST} ${AUTOTOOLS_CFLAGS} ${AUTOTOOLS_CXXFLAGS}"
                     BUILD_COMMAND make -j ${N}
                     INSTALL_COMMAND make -j ${N} install
-                    BUILD_IN_SOURCE 1
                    )
 
 set(PREFIX_CLEAN_DIRS bin include lib share)
@@ -45,8 +57,8 @@ add_library(faad2 STATIC IMPORTED GLOBAL)
 add_library(mp4v2 STATIC IMPORTED GLOBAL)
 
 IF(UNIX)
-set(FAAD_LIB_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib/libfaad.a")
-set(MP4V2_LIB_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib/libmp4v2.a")
+set(FAAD_LIB_PATH "${CMAKE_CURRENT_BINARY_DIR}/faad2_proj-prefix/lib/libfaad.a")
+set(MP4V2_LIB_PATH "${CMAKE_CURRENT_BINARY_DIR}/mp4v2_proj-prefix/lib/libmp4v2.a")
 ENDIF(UNIX)
 
 if(WIN32)
