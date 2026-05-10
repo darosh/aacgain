@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: brew install cmake autoconf automake libtool
+
+      - name: Build arm64
+        run: |
+          cmake -B build/arm64 -S . -DCMAKE_OSX_ARCHITECTURES=arm64
+          cmake --build build/arm64
+
+      - name: Build x86_64
+        run: |
+          cmake -B build/x86_64 -S . -DCMAKE_OSX_ARCHITECTURES=x86_64
+          cmake --build build/x86_64
+
+      - name: Create universal binary
+        run: |
+          lipo -create build/arm64/aacgain/aacgain \
+                       build/x86_64/aacgain/aacgain \
+               -output build/aacgain
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: build/aacgain
